@@ -1,24 +1,28 @@
-import scala.collection.mutable.Queue
+import scala.collection.mutable.{PriorityQueue,Queue}
 
 
 
 object Main{
-  //  Menu
-  def main(args :Array[String]){
-    var pm = new ProcessManager(new Dispatcher(),new FirstJob())
-    //pm.initPManager()//
-    var i=0
-    var cpu = new Cpu(1,pm)
-    Menu
-    println("Informe o numero de processos:")
-    val aa = scala.io.StdIn.readInt();
-    for (i <- 0 to (aa-1))
-        pm.insertCpuQueue(ProcessFactory.buildProcess())
+    def main(args :Array[String]){
 
 
-  //  while(!pm.queues(0).isEmpty)
-    //    println(pm.queues(0).dequeue.showProcess())
+  //    Menu
+  var x =10
+  x+=10
+  println(x)
+  println("Informe o numero de processos:")
+  val n = scala.io.StdIn.readInt();
+  var pm = new ProcessManager(new Dispatcher(),new ShortestJobFirst(),n)
+  var cpu = new Cpu(1,pm)
+    cpu.runCpu
 
-        cpu.runCpu()
+/*
+  var p = ProcessFactory.buildProcess()
+  p.receivedQuantum_=(40)
+  p.insightProcess
+  p.receivedQuantum_=(p.receivedQuantum-1)
+  p.insightProcess
+  */
+
   }
 }

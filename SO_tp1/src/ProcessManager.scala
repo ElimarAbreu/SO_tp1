@@ -5,6 +5,9 @@ class ProcessManager(private var _myDis: Dispatcher, private var _mySch: Schudel
     def this(myDis: Dispatcher,mySch : Schudeler){
         this(myDis,mySch, Array(new Queue[Process](),new Queue[Process](),new Queue[Process]()))//Array(0) fila do cpu,rray(1) e Array(2) :HD e impressora
     }
+  def this(myDis: Dispatcher,mySch : Schudeler, numProcess: Int){
+      this(myDis,mySch, Array(ProcessFactory.buildProcessQueue(numProcess),new Queue[Process](),new Queue[Process]()))//Array(0) fila do cpu,rray(1) e Array(2) :HD e impressora
+  }
     //new Array[Queue[Process]](3)
 
     //getters
@@ -32,29 +35,43 @@ class ProcessManager(private var _myDis: Dispatcher, private var _mySch: Schudel
         this.queues(2)+=p
     }
 
-    def verifySettings():Unit={
-        this.mySch.showSchudelerConfig()
+    def showProcessQueue():Unit={
 
+        this.queues(0).foreach(e=>{e.insightProcess()})
+
+    }
+
+    def executeScheduler():Unit={// funcao que aciona o algoritmo de agendamento de processos
+        this.queues(0) = this.mySch.runScheduling(this.queues(0))
+    }
+
+  def verifySettings():Unit={
+        println("|[PManager]__>Fila de processos|")
+        this.showProcessQueue
+        print("\n"+"|[PManager]__>Algoritmo de Agendamento:")
+        this.mySch.showSchudelerConfig
     }
 
     def serveToCpu(cpu: Cpu): Boolean ={//rotina que trata do gerenciamento do cpu
         var resultProcess:Process = null
         var prevProcess = cpu.curProcess
-          if(prevProcess!=null){//caso haja um processo q estava anteriormente executando no cpu
-                if(prevProcess.myQuantum>0){//o processo q estava no cpu teve seu quantum expirado
+        cpu.tickIdleClock(1)
+          if(prevProcess!=null){//caso haja um processo q estava anteriormente executando na cpu
+                if(prevProcess.remainingQuantum>0 /*colocar condicao p qndo solicitar hd ou impressora*/){//o processo q estava no cpu teve seu quantum expirado
                       prevProcess.state_=(Process.READY_STATE)
-                      this.insertCpuQueue(prevProcess)
-                }else{
-                  println("Processo:"+prevProcess.ID+" Terminou!")//processo terminou
+                      this.insertCpuQueue(prevProcess)//coloca o processo novamente na fila de processos da cpu
+                }else{//o processo termina
+                  println("\n"+"|[PManager]__>:Processo:"+prevProcess.ID+" Terminou|")
+                  println()
                   prevProcess = null
                 }
         }
-        if(!this.queues(0).isEmpty){
-            //println("COndicao para pegar um novo processo")
-              resultProcess = this.mySch.runScheduling(this.queues(0))
-              resultProcess.showProcess()
+        if(!this.queues(0).isEmpty){//ocorre a troca de processos
+            if(this.mySch.preemptiveFlag)executeScheduler //caso o algoritmo de agendamento seja preemptivo
+              resultProcess = this.queues(0).dequeue
+                //resultProcess.showProcess()
               this.myDis.dispatchProcess(cpu,resultProcess)//coloca outro processo para executar na cpu
-            true
+          true
         }
         else{
             false

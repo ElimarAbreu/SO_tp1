@@ -1,8 +1,8 @@
 import scala.collection.mutable.Queue
 
 trait Schudeler{
-
-  def runScheduling(pQueue: Queue[Process]): Process
+  val preemptiveFlag: Boolean
+  def runScheduling(pQueue: Queue[Process]): Queue[Process]
   def showSchudelerConfig():Unit
-  def setQuantuns(pQueue: Queue[Process]): Unit 
+
 }
