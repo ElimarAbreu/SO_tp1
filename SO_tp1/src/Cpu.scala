@@ -47,9 +47,9 @@ def showResultCpuClock(){
 }
 
   private def runCurrentProcess():Unit={// @TODO melhorar a maneira como os quantuns sao analizados durante a execucao
-        println("|[CPU]__>:Iniciando processo:("+this.curProcess.ID+")|")
+        println("\n|[CPU]__>:Iniciando processo:("+this.curProcess.ID+")|")
 
-        while(this.curProcess.receivedQuantum >0){
+        while(this.curProcess.receivedQuantum>0 && this.curProcess.remainingQuantum >0){
               tickOccupiedClock(1)//incrementa uma unidade na quantidade de clock ocupado
               println("|[CPU]__>:"+this.curProcess.showProcessRunning()+"|")
               curProcess.remainingQuantum_=(curProcess.remainingQuantum -1)//diminui um quantum da quantidade restante para acabar a tarefa

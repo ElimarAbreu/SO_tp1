@@ -62,7 +62,7 @@ class ProcessManager(private var _myDis: Dispatcher, private var _mySch: Schudel
                       this.insertCpuQueue(prevProcess)//coloca o processo novamente na fila de processos da cpu
                 }else{//o processo termina
                   println("\n"+"|[PManager]__>:Processo:"+prevProcess.ID+" Terminou|")
-                  println()
+                
                   prevProcess = null
                 }
         }
