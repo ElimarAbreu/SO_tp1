@@ -1,12 +1,20 @@
-object Menu {
+class Menu {
 
       var a=0;
       var b=0;
       var c=0;
       var d=0;
       var e=0;
+      var f=0;
+      
+      def get_a = a
       
       //Funções com as opções do menu.
+      
+      def fos{
+        println("Sistema Operacional Fictício");
+      }
+      
       def tiposistema{
         println("Informe o tipo de sistema a ser simulado:");
         println("1 - Sistemas Batch");
@@ -56,7 +64,7 @@ object Menu {
          println("Informe o algoritmo de escalonamento a ser utilizado:");
          if(c==1){  //Opções para sistemas premptivo.
            println("1 - Round Robin"); 
-           println("2 - Prioridades"); 
+           println("2 - Shortest Process Remaining Time"); 
          }
          if(c==2 || b==1){  //Opções para sistemas não premptivo(cooperativo).
            println("1 -  First-In First-Out (FIFO)");
@@ -70,17 +78,10 @@ object Menu {
       }
       def nprocessos{
          println("Informe a quantidade de processos:");
-         val f = scala.io.StdIn.readInt();
+         f = scala.io.StdIn.readInt();
       }
       def erro{
         println("Opção inválida!");
       }
-
-      //Chamada das funções do menu.
-      println("Sistema Operacional Fictício");
-      tiposistema
-      recursosistema
-      processamento
-      algoritmos
-
+      
 }
