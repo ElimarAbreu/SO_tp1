@@ -23,7 +23,8 @@ object  ProcessFactory {
              var newP = this.buildProcess()
                 if(numOther>0){
                   newP.setQuantumSignal_=(1+rr.nextInt(newP.myQuantum -1))//configura em qual quantum do cpu o processo deve solicitar outro recurso(impressora ou hd)
-                  if(rr.nextBoolean()) newP.hdQuantum_=(2*(1 + rr.nextInt(10) )) else newP.printerQuantum_=(2*(1 + rr.nextInt(10) ))//caso seja true constroi um processo do hd , caso contrario constroe um da impressora
+                  //if(rr.nextBoolean()) newP.hdQuantum_=(2*(1 + rr.nextInt(10) )) else newP.printerQuantum_=(2*(1 + rr.nextInt(10) ))//caso seja true constroi um processo do hd , caso contrario constroe um da impressora
+                  newP.hdQuantum_=(2*(1 + rr.nextInt(10) ))
                   numOther = numOther-1
                 }
                 qProcess+=newP

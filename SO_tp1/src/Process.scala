@@ -33,7 +33,7 @@ class Process(private var _ID: Int, private var _priority:Int, private var _stat
 
   def signalResource = _signalResource
   def setQuantumSignal_=(numberQ: Int) = this._signalResource = numberQ // define em qual quantum o processador ira saber q este processo precisa do hd ou impressora dentro do intervalo de quantuns do processo[1,(myQuantum-1)]
-  def hasSignalInThisQuantum(qi: Int): Boolean= (qi == this._signalResource)
+  def hasSignalInThisQuantum(): Boolean= (((this.myQuantum -this.remainingQuantum) == this._signalResource)&& this._signalResource > 0)
 
 
   def showProcessRunning():String={

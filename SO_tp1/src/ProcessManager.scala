@@ -1,48 +1,35 @@
 import scala.collection.mutable.Queue
 
-class ProcessManager(private var _myDis: Dispatcher, private var _mySch: Schudeler,private var _queues: Array[Queue[Process]]){
+class ProcessManager(private var _myDis: Dispatcher, private var _mySch: Schudeler,private var _mainQueue:Queue[Process],private var _returnQueue:Queue[Process],private var _countProcessBack:Int){
 
-    def this(myDis: Dispatcher,mySch : Schudeler){
-        this(myDis,mySch, Array(new Queue[Process](),new Queue[Process](),new Queue[Process]()))//Array(0) fila do cpu,rray(1) e Array(2) :HD e impressora
-    }
-  def this(myDis: Dispatcher,mySch : Schudeler, numProcess: Int){
-      this(myDis,mySch, Array(ProcessFactory.buildProcessQueue(numProcess),new Queue[Process](),new Queue[Process]()))//Array(0) fila do cpu,rray(1) e Array(2) :HD e impressora
-  }
-    //new Array[Queue[Process]](3)
+
+    def this(myDis: Dispatcher,mySch : Schudeler, numProcess: Int){
+        this(myDis,mySch, ProcessFactory.buildProcessQueue(numProcess),new Queue[Process](),0 )//Array(0) fila do cpu,Array(1) armazena os processos que ja foram executados pelo hd e impressora
+      }
 
     //getters
     def myDis = _myDis
     def mySch = _mySch
-    def queues = _queues
+    def mainQueue = _mainQueue
+    def returnQueue = _returnQueue
+    def countProcessBack = _countProcessBack//utilizado para que o cpu nao possa encerrar sem que todos os processos q requisitaram dispositivos de I/O tenham sido devidamente finalizados
 
-    def initPManager():Unit={
+    def countProcessBack_=(num:Int): Unit={_countProcessBack =num}
 
-        this.queues(0) = new Queue[Process]()
-        this.queues(1) = new Queue[Process]()
-        this.queues(2) = new Queue[Process]()
-
+    def insertMainQueue(p: Process){
+        mainQueue+=p
     }
 
-    def insertCpuQueue(p: Process){
-        this.queues(0)+=p
-    }
-
-    def insertHdQueue(p: Process){
-        this.queues(1)+=p
-    }
-
-    def insertPrinterQueue(p: Process){
-        this.queues(2)+=p
+    def insertReturnQueue(p: Process){
+        returnQueue+=p
     }
 
     def showProcessQueue():Unit={
-
-        this.queues(0).foreach(e=>{e.insightProcess()})
-
+        mainQueue.foreach(e=>{e.insightProcess()})
     }
 
     def executeScheduler():Unit={// funcao que aciona o algoritmo de agendamento de processos
-        this.queues(0) = this.mySch.runScheduling(this.queues(0))
+       this.mySch.runScheduling(mainQueue)
     }
 
   def verifySettings():Unit={
@@ -57,21 +44,38 @@ class ProcessManager(private var _myDis: Dispatcher, private var _mySch: Schudel
         var prevProcess = cpu.curProcess
         cpu.tickIdleClock(1)
           if(prevProcess!=null){//caso haja um processo q estava anteriormente executando na cpu
-                if(prevProcess.remainingQuantum>0 /*colocar condicao p qndo solicitar hd ou impressora*/){//o processo q estava no cpu teve seu quantum expirado
-                      prevProcess.state_=(Process.READY_STATE)
-                      this.insertCpuQueue(prevProcess)//coloca o processo novamente na fila de processos da cpu
-                }else{//o processo termina
+                if(prevProcess.remainingQuantum>0){//o processo q estava no cpu teve seu quantum expirado ou solicitou o  hd ou impressora
+                      if(!prevProcess.hasSignalInThisQuantum){//caso o processo nao tenha solicitado a cpu ou hd neste indice de quantum
+                        prevProcess.state_=(Process.READY_STATE)
+                        this.insertMainQueue(prevProcess)//coloca o processo novamente na fila de processos da cpu
+                      }else{//processo solicitou o hd ou impressora
+                        prevProcess.setQuantumSignal_=(0)
+                        prevProcess.state_=(Process.BLOCKED_STATE)
+                        countProcessBack_=(countProcessBack+1)
+                        if(prevProcess.hdQuantum > 0){
+                            cpu.mySignalBus.insertHDQueue(prevProcess)//processo encaminhado para a fila do hd no barramento
+                        }else{
+                          println("Else vazio")
+                            //cpu.mySignalBus.insertPrinterQueue(prevProcess)//processo vai para fila da impressora no barramento
+                        }
+                    }
+                }
+
+                else{//o processo termina
                   println("\n"+"|[PManager]__>:Processo:"+prevProcess.ID+" Terminou|")
-                
                   prevProcess = null
                 }
         }
-        if(!this.queues(0).isEmpty){//ocorre a troca de processos
+        //println("|[PManager]__>:"+"valor de COunter"+countProcessBack)
+        if(!mainQueue.isEmpty){//ocorre a troca de processos, caso na haja mais processos na fila principal do cpu, sinaliza ao cpu para encerrar
             if(this.mySch.preemptiveFlag)executeScheduler //caso o algoritmo de agendamento seja preemptivo
-              resultProcess = this.queues(0).dequeue
+              resultProcess = mainQueue.dequeue
                 //resultProcess.showProcess()
               this.myDis.dispatchProcess(cpu,resultProcess)//coloca outro processo para executar na cpu
           true
+        }else if(countProcessBack > 0){
+                  this.myDis.dispatchProcess(cpu,null)//quando nao ha mais processos na fila principal porem o cpu deve esperar por processos que estao sendo executados por dispositvos I/O
+                true
         }
         else{
             false
@@ -81,19 +85,20 @@ class ProcessManager(private var _myDis: Dispatcher, private var _mySch: Schudel
 
 
 
+    def getProcessFromResources(cpu: Cpu):Unit={
 
-
-    def serveToHd(hd: HardDisk):Unit={
-
-
+          cpu.mySignalBus.getCpuQueue(returnQueue)//pega os processos que finalizaram I/O
+          returnQueue.foreach(e=>{
+            e.state_=(Process.READY_STATE)
+          })
+          //println("Tamanho:"+returnQueue.length)
+          countProcessBack_=(countProcessBack - returnQueue.length)//decrementa o contador de processos que utilizaram I/O
+          while(!returnQueue.isEmpty){
+              this.insertMainQueue(returnQueue.dequeue)//insere o processo de volta na fila princial de processos do cpu
+          }
 
     }
 
-    def serveToPrinter(imp: Printer):Unit={
-
-
-
-    }
 
 
 
