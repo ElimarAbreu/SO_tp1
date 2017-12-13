@@ -23,21 +23,21 @@ class Cpu( private var _coreId: Int, private var _myPManager: ProcessManager ,pr
   def tickIdleClock(numClocks: Int):Unit ={this._idleClock+=numClocks}
 
   def msgHeaderCpu():String={
-    "|[CPU]_("+this.coreId+")_>:"
+    "|[CPU]_(CoreId:"+this.coreId+")|>"
   }
 
   private def processManagerRequest():Boolean={
       this.myPManager.serveToCpu(this)
   }
 
-private def takeBackProcess():Unit={
-  //println(this.msgHeaderCpu+"takeBackProcess")
+/*private def takeBackProcess():Unit={
+  if(mySignalBus.getSignal)
   this.myPManager.getProcessFromResources(this)
 }
-
+*/
 private  def checkPManager():Boolean={
       if(this.myPManager!=null){
-          this.myPManager.verifySettings()
+          //this.myPManager.verifySettings()
           true
       }else{
           println(this.msgHeaderCpu+":Erro CPU sem ProcessManager|")
@@ -48,7 +48,7 @@ private  def checkPManager():Boolean={
 
 def showResultCpuClock(){
     println()
-    println("___Log de de ciclos do CPU__#"+this.coreId)
+    println("___Log de de ciclos de [CPU]: (CoreId:"+this.coreId+")")
     println("------Ciclos ocupados:"+this.occupiedClock)
     println("------Ciclos ociosos:"+this.idleClock)
 
@@ -57,17 +57,17 @@ def showResultCpuClock(){
 
   private def runCurrentProcess():Unit={// @TODO melhorar a maneira como os quantuns sao analizados durante a execucao
       if(this.curProcess!= null){
-          println("\n"+this.msgHeaderCpu +"Iniciando processo:(" + this.curProcess.ID+")|")
+          println("\n"+this.msgHeaderCpu +"Iniciando Processo(ID:" +this.curProcess.ID+")|")
           while(this.curProcess.receivedQuantum>0 && this.curProcess.remainingQuantum >0 && !this.curProcess.hasSignalInThisQuantum){
                 tickOccupiedClock(1)//incrementa uma unidade na quantidade de clock ocupado
-                println(this.msgHeaderCpu+this.curProcess.showProcessRunning()+"|")
+                println(this.msgHeaderCpu+"\t"+this.curProcess.showProcessRunning())
                 curProcess.remainingQuantum_=(curProcess.remainingQuantum -1)//diminui um quantum da quantidade restante para acabar a tarefa
                 curProcess.receivedQuantum_=(curProcess.receivedQuantum-1)
           }
           if(this.curProcess.hasSignalInThisQuantum){
-              println(this.msgHeaderCpu+"Processo Solicitou("+curProcess.ID +") I/O")
-              curProcess.remainingQuantum_=(curProcess.remainingQuantum -1)
-              curProcess.receivedQuantum_=(curProcess.receivedQuantum-1)
+              println(this.msgHeaderCpu+"Processo Solicitou["+curProcess.ID +"]"+{if(curProcess.hdQuantum>0) "Disco Rigido" else "Impressora"})
+            //  curProcess.remainingQuantum_=(curProcess.remainingQuantum -1)
+            //  curProcess.receivedQuantum_=(curProcess.receivedQuantum-1)
           }
 
       }
@@ -77,21 +77,18 @@ def showResultCpuClock(){
 
   private def runCpu(): Unit={
     if(checkPManager && this.mySignalBus!=null){
-      myPManager.executeScheduler
+
       while(this.processManagerRequest()){
             runCurrentProcess
-          if(mySignalBus.getSignal)//verifica se o hd ou impressora ja executaram processos que estavam em suas filas
-              takeBackProcess
-
       }
-        this.mySignalBus.setSignalToContinue_=(false)//avisa os dispositivos de I/O para encerrarem a thread
+      this.mySignalBus.setSignalToContinue_=(false)//avisa os dispositivos de I/O para encerrarem a thread
     }else println("Erro nas configurações")
     showResultCpuClock
   }
 
   def run(){
       this.runCpu
-      println("Cpu Encerrou")
+      println("Cpu Encerrou"+this.coreId)
   }
 
 }

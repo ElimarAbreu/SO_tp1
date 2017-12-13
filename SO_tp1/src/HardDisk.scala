@@ -7,7 +7,7 @@ class HardDisk(private var _ID:Int, private var _myQueue:Queue[Process], private
 
   def ID_=(id:Int):Unit={_ID = id}
   def ID = _ID
-  def getHdBusSignal = signalBus//pega a referencia do barramento de sinal
+  def getMyBusSignal = signalBus//pega a referencia do barramento de sinal
 
   def myQueue = _myQueue
 
@@ -17,7 +17,7 @@ class HardDisk(private var _ID:Int, private var _myQueue:Queue[Process], private
 
 
   def transferDoneProcess(p:Process):Unit ={
-    getHdBusSignal.insertCpuQueue(p)
+    getMyBusSignal.insertCpuQueue(p)
   }
 
   def runCurrentHdProcess():Process ={
@@ -35,9 +35,9 @@ class HardDisk(private var _ID:Int, private var _myQueue:Queue[Process], private
 
   def runHDResource():Unit ={
 
-      while(getHdBusSignal.getSignalToContinue){
-        if(this.getHdBusSignal.hasProcessInHDQueue)
-            getHdBusSignal.getHDQueue(myQueue)//pega a fila de processos do barramento e armazena em myQueue
+      while(getMyBusSignal.getSignalToContinue){
+        if(this.getMyBusSignal.hasProcessInHDQueue)
+            getMyBusSignal.getHDQueue(myQueue)//pega a fila de processos do barramento e armazena em myQueue
 
             while(!myQueue.isEmpty)//executa a fila de processos que anteriormente estava no barramento
               transferDoneProcess(runCurrentHdProcess())

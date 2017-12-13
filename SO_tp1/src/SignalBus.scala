@@ -17,13 +17,15 @@ class SignalBus(private var _signal:Boolean , private var signalToContinue:Boole
     def hdQueue = _hdQueue
     def printerQueue = _printerQueue
 
-    //Funcoes que o cpu vai utilizar no barramento de sinal
+    def notPreemptiveTurn():Boolean={this.synchronized{ (_signal && !cpuQueue.isEmpty)} }
+
+    //Funcoes que o cpu(executando o S.O) vai utilizar no barramento de sinal
     def getCpuQueue(recQ: Queue[Process]): Queue[Process]={
       this.synchronized{
           while(!cpuQueue.isEmpty){
               recQ+=cpuQueue.dequeue
           }
-      //  println("Tamanho em signal bus"+recQ.length)
+    
         setSignal_=(false)
         recQ
       }
@@ -42,6 +44,11 @@ class SignalBus(private var _signal:Boolean , private var signalToContinue:Boole
         }
     }
 
+  def getOneProcess():Process={//metodo usado pelo cpu no modo batch
+    this.synchronized{
+        cpuQueue.dequeue
+    }
+  }
 
     //funcoes que o hd e a impressora vao usar no barramento
 
@@ -50,14 +57,14 @@ class SignalBus(private var _signal:Boolean , private var signalToContinue:Boole
     def hasProcessInPrinterQueue():Boolean={this.synchronized{(!_printerQueue.isEmpty)}}
 
 
-    def insertCpuQueue(p: Process): Unit={//funcao que vai ser utilizada pelo hd e impressora para devolver os processos que executaram
+    def insertCpuQueue(p: Process): Unit={//metodo utilizado pela impressora e Disco Rigido para devolver processos ja executados pelos mesmos ao S.O
         this.synchronized{
                   _cpuQueue+=p
-                  if(!getSignal)setSignal_=(true)
+                  if(!_signal) _signal = true
         }
     }
 
-    def getHDQueue(q: Queue[Process]):Queue[Process]={
+    def getHDQueue(q: Queue[Process]):Queue[Process]={//metodo utilizado pelo Disco Rigido para pegar do barramento seus  processos pendentes
 
       this.synchronized{
         while(!hdQueue.isEmpty){
@@ -67,7 +74,7 @@ class SignalBus(private var _signal:Boolean , private var signalToContinue:Boole
       }
     }
 
-    def getPrinterQueue(q: Queue[Process]): Queue[Process]={
+    def getPrinterQueue(q: Queue[Process]): Queue[Process]={//metodo utilizado pela impressora para pegar do barramento seus  processos pendentes
 
       this.synchronized{
         while(!printerQueue.isEmpty){

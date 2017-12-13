@@ -1,3 +1,5 @@
+import scala.collection.mutable.Queue
+
 class Process(private var _ID: Int, private var _priority:Int, private var _state:Int, private var _myQuantum:Int, private var _remainingQuantum: Int,private var _receivedQuantum:Int,private var _hdQuantum: Int,private var _printerQuantum: Int, private var _signalResource:Int = 0 ){
 
 //myQuantum é o tempo q o processo vai precisar ao todo para terminar
@@ -37,7 +39,7 @@ class Process(private var _ID: Int, private var _priority:Int, private var _stat
 
 
   def showProcessRunning():String={
-    ("Running quantum:"+(this.myQuantum -this.remainingQuantum))
+    ("[Process ("+this.ID+")]Executando Quantum: #"+(this.myQuantum -this.remainingQuantum))
   }
 
   def showProcess():String={
@@ -51,7 +53,6 @@ class Process(private var _ID: Int, private var _priority:Int, private var _stat
     println("ID:"+this._ID+"|priority:"+this.priority+"|state:"+this.state+"|myQuantum:"+this.myQuantum+"|RMQuantum:"+this.remainingQuantum+":|RECQuantum:"+this.receivedQuantum+"|hdQ:"+hdQuantum+"|printQ:"+printerQuantum+"|signalQ:"+signalResource)
 
 
-
   }
 
 
@@ -61,5 +62,9 @@ object  Process{
     val BLOCKED_STATE = 0
     val RUNNING_STATE=1
     val READY_STATE=2
+
+    def showProcessQueue(q: Queue[Process]):Unit={
+        q.foreach(e=>{e.insightProcess()})
+    }
 
 }

@@ -7,7 +7,7 @@ object Main{
 
 
 	//Instanciando objeto Menu
-  var Mymenu = new Menu;
+  var Mymenu = new Menu
 
   //Opções do Menu
   Mymenu.fos
@@ -17,10 +17,14 @@ object Main{
   Mymenu.algoritmos
   Mymenu.nprocessos
 
-   var pm : ProcessManager=null
+  var pm : ProcessManager=null
   var cpu : Cpu= null
-  var busSignal = new SignalBus()
   var hd:HardDisk=null
+  var printer:Printer=null
+  var busSignal = new SignalBus()
+  var cpu2: Cpu= null
+  var t1 : Thread =null
+  var t2 : Thread =null
   //Se o sistema for preemptivo.
   if(Mymenu.c==1){
     Mymenu.e match {
@@ -35,12 +39,30 @@ object Main{
         case 2=> pm = new ProcessManager(new Dispatcher(),new ShortestJobFirst(),Mymenu.f)
     }
   }
-
-  cpu = new Cpu(Mymenu.d,pm,busSignal)
+  pm.verifySettings
+  printer = new Printer(7,busSignal)
+  //cpu = new Cpu(,pm,busSignal)
   hd = new HardDisk(10,busSignal)
-
-  new Thread(cpu).start
   new Thread(hd).start
+  new Thread(printer).start
+
+if(Mymenu.d == 2){
+
+  cpu = new Cpu(1,pm,busSignal)
+  cpu2 = new Cpu(2,pm,busSignal)
+  t1 = new Thread(cpu)
+  t2 = new Thread(cpu2)
+  t1.start
+  t2.start
+  t1.join
+  t2.join
+}else{
+  cpu = new Cpu(1,pm,busSignal)
+  t1 = new Thread(cpu)
+  t1.start
+  t1.join
+}
+  //new Thread(cpu).start
 
 
 /*Descomentar esta parte para teste
