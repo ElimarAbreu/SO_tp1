@@ -21,21 +21,18 @@ object  ProcessFactory {
       var numOther = Math.ceil(perc*numProcess)//if( perc > 0.5 ) Math.ceil((perc-0.5)*numProcess) else Math.ceil(perc*numProcess)  //define q o numero de processos de hd ou impressora seja no maximo 50% do total de processos q o usuario digitou
       //println("Numero de processos de outros"+numOther)
       for (i <- 0 to (numProcess-1)){
-             var newP = this.buildProcess()
-                if(numOther>0){
-                  newP.setQuantumSignal_=(1+rr.nextInt(newP.myQuantum -1))//configura em qual quantum do cpu o processo deve solicitar outro recurso(impressora ou hd)
-                  if(rr.nextBoolean())
-                    newP.hdQuantum_=(2*(1 + rr.nextInt(10) ))
-                  else
-                    newP.printerQuantum_=(2*(1 + rr.nextInt(10) ))
-
-                  numOther = numOther-1
-                }
-                qProcess+=newP
+          var newP = this.buildProcess()
+          if(numOther>0){
+              newP.setQuantumSignal_=(1+rr.nextInt(newP.myQuantum -1))//configura em qual quantum do cpu o processo deve solicitar outro recurso(impressora ou hd)
+              if(rr.nextBoolean())
+                  newP.hdQuantum_=(2*(1 + rr.nextInt(10) ))
+              else
+                  newP.printerQuantum_=(2*(1 + rr.nextInt(10) ))
+              numOther = numOther-1
           }
-          qProcess
-        }
-
-
+          qProcess+=newP
+      }
+      qProcess
+  }
 
 }

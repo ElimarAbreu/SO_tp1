@@ -68,7 +68,7 @@ class Menu{
           println("2 - Shortest Process Remaining Time");
       }
       if(c==2 || b==1){  //Opções para sistemas não premptivo(cooperativo).
-          println("1 -  First-In First-Out (FIFO)");
+          println("1 - First-In First-Out (FIFO)");
           println("2 - Shortest Job First");
       }
       e = scala.io.StdIn.readInt();
