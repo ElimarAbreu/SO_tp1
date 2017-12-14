@@ -81,7 +81,6 @@ class ProcessManager(private var _myDis: Dispatcher, private var _mySch: Schudel
       this.synchronized{
           if(ProcessManager.numberOfProcess==(-1) ){ProcessManager.numberOfProcess = mainQueue.length}
               var prevProcess = cpu.curProcess
-          var mustWait:Boolean = false
           cpu.tickIdleClock(1)
           if(prevProcess!=null){//caso haja um processo q estava anteriormente executando na cpu
               if(prevProcess.remainingQuantum>0){//o processo q estava no cpu teve seu quantum expirado ou solicitou o  hd ou impressora
@@ -100,11 +99,17 @@ class ProcessManager(private var _myDis: Dispatcher, private var _mySch: Schudel
                   }
               }
               else{//o processo termina
-                  _numberFinishedProcess +=1
-                  if(!Results.testFlag)
-                      println("\n"+"|[ProcessManager]__>:Processo:ID["+prevProcess.ID+"]Terminou|")
-                  prevProcess = null
-              }
+                      _numberFinishedProcess +=1
+                      if(Results.testFlag){
+                            prevProcess.resetProcess
+                            ProcessFactory.resetQueue+=prevProcess
+                        }
+                      else
+                            println("\n"+"|[ProcessManager]__>:Processo:ID["+prevProcess.ID+"]Terminou|")
+
+                      cpu.curProcess_=(null)
+                      prevProcess = null
+                  }
           }
           if(mySch.preemptiveFlag)
               runInPreemptiveMode(cpu)

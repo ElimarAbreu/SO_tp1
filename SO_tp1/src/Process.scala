@@ -4,8 +4,8 @@ class Process(private var _ID: Int, private var _priority:Int, private var _stat
 
   //myQuantum é o tempo q o processo vai precisar ao todo para terminar
   //receivedQuantum é o quantum q o escalonador forneceu ao processo
-  def this(_ID: Int, _state: Int, _myQuantum: Int, _hdQuantum: Int,_printerQuantum: Int){//construtor secundario com apenas 3 argumentos, usar este ao criar processos
-      this(_ID,0,_state,_myQuantum,_myQuantum,0,_hdQuantum,_printerQuantum,0,0,_hdQuantum,_printerQuantum);//signal resource é usando para saber em qual quantum avisar o cpu que ele precisa do hd ou impressora
+  def this(_ID: Int,priority: Int, _state: Int, _myQuantum: Int, _hdQuantum: Int,_printerQuantum: Int){//construtor secundario com apenas 3 argumentos, usar este ao criar processos
+      this(_ID,priority,_state,_myQuantum,_myQuantum,0,_hdQuantum,_printerQuantum,0,0,_hdQuantum,_printerQuantum);//signal resource é usando para saber em qual quantum avisar o cpu que ele precisa do hd ou impressora
   }
 
   //setters e getters dos atributos da classe
