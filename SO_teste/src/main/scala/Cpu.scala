@@ -1,7 +1,6 @@
 class Cpu( private var _coreId: Int, private var _myPManager: ProcessManager ,private var _mySignalBus: SignalBus, private var _curProcess: Process,private var _occupiedClock: Int,private var _idleClock:Int) extends Runnable {
 
-
-
+  
   def this(_coreId: Int,myPManager: ProcessManager,bus: SignalBus){
       this(_coreId,myPManager,bus,null,0,0)
   }
@@ -63,24 +62,22 @@ private  def checkPManager():Boolean={
               if(!Results.testFlag)println(this.msgHeaderCpu+"Processo Solicitou["+curProcess.ID +"]"+{if(curProcess.hdQuantum>0) "Disco Rigido" else "Impressora"})
             }
         }else{//processo solicitou algum recurso(impressora ou hd)
+                while(mySignalBus.getCoreTurn!=SignalBus.RESOURCE_FREE){
+                }
+                if(curProcess.hdQuantum>0){
+                    tickIdleClock(curProcess.hdQuantum)
+                      mySignalBus.insertHDQueue(curProcess,this.coreId)
+                }else{
+                    tickIdleClock(curProcess.printerQuantum)
+                    mySignalBus.insertPrinterQueue(curProcess,this.coreId)
+                }
 
-            while(mySignalBus.getCoreTurn!=SignalBus.RESOURCE_FREE){
-                //Thread.sleep(200)
-            }
-            if(curProcess.hdQuantum>0){
-                tickIdleClock(curProcess.hdQuantum)
-                  mySignalBus.insertHDQueue(curProcess,this.coreId)
-            }else{
-                tickIdleClock(curProcess.printerQuantum)
-                mySignalBus.insertPrinterQueue(curProcess,this.coreId)
-            }
+                while(!mySignalBus.notPreemptiveTurn){
 
-            while(!mySignalBus.notPreemptiveTurn){
-
-            }
-            curProcess_=(mySignalBus.getOneProcess)
-            curProcess.state_=(Process.RUNNING_STATE)
-            runCurrentProcess//chamada recursiva para voltar a executar o processo quando volta do recurso
+                }
+                curProcess_=(mySignalBus.getOneProcess)
+                curProcess.state_=(Process.RUNNING_STATE)
+                runCurrentProcess//chamada recursiva para voltar a executar o processo quando volta do recurso
         }
       }
     }

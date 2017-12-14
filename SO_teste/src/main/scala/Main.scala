@@ -5,7 +5,7 @@ import scala.collection.mutable.Queue
 object Main{
     def main(args :Array[String]){
 
-
+/*
 	//Instanciando objeto Menu
   var Mymenu = new Menu
 
@@ -59,50 +59,34 @@ object Main{
   threads.foreach(t=>{t.join})
   Results.showResults
 
-
+*/
 //println("FIM")
   //new Thread(cpu).start
 
-/* Relatorio de testes
+///Relatorio de testes
+
   Results.testFlag = true
-  var numCpus:Int=1
-  var pm : ProcessManager=null
-  var cpu : Cpu = null
-  var threads : Array[Thread] = null
-  var hd:HardDisk=null
-  var printer:Printer=null
-  var busSignal = new SignalBus()
+  var busSignal: SignalBus=null
+
+  var threads = new Array[Thread](3)
   var schudelers =new Array[Schudeler](4)
+  ProcessFactory.resetQueue = ProcessFactory.buildProcessQueue(100)//cria uma fila de processos para teste
   schudelers(0) = new FIFO()
   schudelers(1) = new ShortestJobFirst()
   schudelers(2) = new RoundRobin()
   schudelers(3) = new ShortestProcessRemaining()
-  var q = ProcessFactory.buildProcessQueue(100)//cria uma fila de processos para teste
-//  Process.showProcessQueue(ProcessFactory.resetProcessQueue)
+  Process.showProcessQueue(ProcessFactory.resetQueue)
   for(j<-1 to schudelers.length){
-
-      pm = new ProcessManager(new Dispatcher(),schudelers(j-1),q.clone)
-      pm.verifySettings
-      printer = new Printer(7,busSignal)
-      hd = new HardDisk(10,busSignal)
-
-      threads = new Array[Thread](3)
-
-    //  for(i<-1 to numCpus)
-      cpu = new Cpu(j,pm,busSignal)
-      //for(i<-1 to (numCpus))
-      threads(0) = new Thread(cpu)
-      threads(1) = new Thread(hd)
-      threads(2) = new Thread(printer)
-
-
+      busSignal = new SignalBus()
+      threads(0) = new Thread(new Cpu(j,new ProcessManager(new Dispatcher(),schudelers(j-1),ProcessFactory.resetQueue),busSignal))
+      threads(1) = new Thread(new HardDisk(j+10,busSignal))
+      threads(2) = new Thread(new Printer(j+11,busSignal))
       threads.foreach(t=>{t.start})
       threads.foreach(t=>{t.join})
       Results.showResults
       Results.cleanQueue
 
-      //println("Apos")
     }
-*/
+
   }
 }

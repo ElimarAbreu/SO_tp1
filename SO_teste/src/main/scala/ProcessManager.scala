@@ -6,15 +6,24 @@ class ProcessManager(private var _myDis: Dispatcher, private var _mySch: Schudel
     def this(myDis: Dispatcher,mySch : Schudeler, numProcess: Int){
         this(myDis,mySch, ProcessFactory.buildProcessQueue(numProcess),new Queue[Process](),0 )//Array(0) fila do cpu,Array(1) armazena os processos que ja foram executados pelo hd e impressora
       }
-      def this(myDis: Dispatcher,mySch : Schudeler, q: Queue[Process]){
+    def this(myDis: Dispatcher,mySch : Schudeler, q: Queue[Process]){
           this(myDis,mySch, q,new Queue[Process](),0 )//Array(0) fila do cpu,Array(1) armazena os processos que ja foram executados pelo hd e impressora
         }
+
 
     //getters
     def myDis = _myDis
     def mySch = _mySch
     def mainQueue = _mainQueue
+    def mainQueue_=(q:Queue[Process])={
+      _mainQueue = q
+    }
     def returnQueue = _returnQueue
+
+    def mySch_=(sch:Schudeler){
+          this._mySch = sch
+    }
+
     def insertMainQueue(p: Process){
         mainQueue+=p
     }
@@ -45,7 +54,7 @@ class ProcessManager(private var _myDis: Dispatcher, private var _mySch: Schudel
     }
 
 
-    private def getProcessFromResources(cpu: Cpu):Unit={
+  private def getProcessFromResources(cpu: Cpu):Unit={
 
           cpu.mySignalBus.getCpuQueue(returnQueue)//pega os processos que finalizaram I/O
           returnQueue.foreach(e=>{
@@ -56,13 +65,12 @@ class ProcessManager(private var _myDis: Dispatcher, private var _mySch: Schudel
               this.insertMainQueue(returnQueue.dequeue)//insere o processo de volta na fila princial de processos do cpu
           }
 
-        }
+      }
 
   private def runInPreemptiveMode(cpu: Cpu): Unit={
         var resultProcess : Process = null
           if(cpu.mySignalBus.getSignal)
               this.getProcessFromResources(cpu)
-
           if(!mainQueue.isEmpty){//ocorre a troca de processos, caso na haja mais processos na fila principal do cpu, sinaliza ao cpu para encerrar
                 executeScheduler //executa o algoritmo de agendamento
                 resultProcess = mainQueue.dequeue
@@ -89,10 +97,9 @@ class ProcessManager(private var _myDis: Dispatcher, private var _mySch: Schudel
 
   def serveToCpu(cpu: Cpu): Boolean ={//rotina que trata do gerenciamento do cpu
       this.synchronized{
-
+      //  if(!ProcessManager._firstExecuteScheduling && Results.testFlag)this.verifySettings
           if(ProcessManager.numberOfProcess==(-1) ){ProcessManager.numberOfProcess = mainQueue.length}
               var prevProcess = cpu.curProcess
-              var mustWait:Boolean = false
               cpu.tickIdleClock(1)
                 if(prevProcess!=null){//caso haja um processo q estava anteriormente executando na cpu
                       if(prevProcess.remainingQuantum>0){//o processo q estava no cpu teve seu quantum expirado ou solicitou o  hd ou impressora
@@ -112,9 +119,14 @@ class ProcessManager(private var _myDis: Dispatcher, private var _mySch: Schudel
                       }
                       else{//o processo termina
                           _numberFinishedProcess +=1
-                          if(!Results.testFlag)
-                            println("\n"+"|[ProcessManager]__>:Processo:ID["+prevProcess.ID+"]Terminou|")
+                          if(Results.testFlag){
+                                prevProcess.resetProcess
+                                ProcessFactory.resetQueue+=prevProcess
+                          }
+                          else
+                              println("\n"+"|[ProcessManager]__>:Processo:ID["+prevProcess.ID+"]Terminou|")
 
+                        cpu.curProcess_=(null)
                         prevProcess = null
                       }
               }
@@ -126,9 +138,7 @@ class ProcessManager(private var _myDis: Dispatcher, private var _mySch: Schudel
 
               if(_numberFinishedProcess == ProcessManager.numberOfProcess){
                     cpu.mySignalBus.setSignalToContinue_=(false)
-
                     false
-
                 }else
                     true
 

@@ -1,10 +1,4 @@
-[0m[[0m[31merror[0m] [0m[0m/home/julio/Documentos/SO_teste/src/main/scala/ProcessManager.scala:137:60: type mismatch;[0m
-[0m[[0m[31merror[0m] [0m[0m found   : Unit[0m
-[0m[[0m[31merror[0m] [0m[0m required: Boolean[0m
-[0m[[0m[31merror[0m] [0m[0m                    ProcessManager._firstExecuteScheduling = false[0m
-[0m[[0m[31merror[0m] [0m[0m                                                           ^[0m
-[0m[[0m[33mwarn[0m] [0m[0m/home/julio/Documentos/SO_teste/src/main/scala/ProcessManager.scala:136:21: a pure expression does nothing in statement position; multiline expressions might require enclosing parentheses[0m
-[0m[[0m[33mwarn[0m] [0m[0m                    false[0m
-[0m[[0m[33mwarn[0m] [0m[0m                    ^[0m
-[0m[[0m[33mwarn[0m] [0m[0mone warning found[0m
+[0m[[0m[31merror[0m] [0m[0m/home/julio/Documentos/SO_teste/src/main/scala/Main.scala:86:29: not found: value j[0m
+[0m[[0m[31merror[0m] [0m[0m      pm.mySch_=(schudelers(j-1))[0m
+[0m[[0m[31merror[0m] [0m[0m                            ^[0m
 [0m[[0m[31merror[0m] [0m[0mone error found[0m
