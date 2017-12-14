@@ -28,6 +28,7 @@ class Printer(private var _ID:Int, private var _myQueue:Queue[Process], private 
             //i = i-1
             p.printerQuantum_=(p.printerQuantum-1)
         }
+        if(!Results.testFlag)
         println("|Impressora["+this.ID+"]|__>: Processo:ID("+p.ID+")Encerrou")
     //p.printerQuantum_=(0)
     p
@@ -49,7 +50,7 @@ class Printer(private var _ID:Int, private var _myQueue:Queue[Process], private 
 
 
       this.runPrinterResource
-      println("impressora encerrou")
+    //println("impressora encerrou")
 
   }
 

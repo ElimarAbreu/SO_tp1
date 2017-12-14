@@ -1,11 +1,11 @@
 import scala.collection.mutable.Queue
 
-class Process(private var _ID: Int, private var _priority:Int, private var _state:Int, private var _myQuantum:Int, private var _remainingQuantum: Int,private var _receivedQuantum:Int,private var _hdQuantum: Int,private var _printerQuantum: Int, private var _signalResource:Int = 0 ){
+class Process(private var _ID: Int, private var _priority:Int, private var _state:Int, private var _myQuantum:Int, private var _remainingQuantum: Int,private var _receivedQuantum:Int,private var _hdQuantum: Int,private var _printerQuantum: Int, private var _signalResource:Int = 0, private var resetSignal: Int,private var resetHdQuantum:Int ,private var resetPrinterQuantum:Int){
 
 //myQuantum é o tempo q o processo vai precisar ao todo para terminar
 //receivedQuantum é o quantum q o escalonador forneceu ao processo
   def this(_ID: Int, _state: Int, _myQuantum: Int, _hdQuantum: Int,_printerQuantum: Int){//construtor secundario com apenas 3 argumentos, usar este ao criar processos
-    this(_ID,0,_state,_myQuantum,_myQuantum,0,_hdQuantum,_printerQuantum,0);//signal resource é usando para saber em qual quantum avisar o cpu que ele precisa do hd ou impressora
+    this(_ID,0,_state,_myQuantum,_myQuantum,0,_hdQuantum,_printerQuantum,0,0,_hdQuantum,_printerQuantum);//signal resource é usando para saber em qual quantum avisar o cpu que ele precisa do hd ou impressora
   }
 
 //setters e getters dos atributos da classe
@@ -28,13 +28,22 @@ class Process(private var _ID: Int, private var _priority:Int, private var _stat
   def receivedQuantum_= (newReceivedQuantum: Int)= this._receivedQuantum = newReceivedQuantum
 
   def hdQuantum = _hdQuantum
-  def hdQuantum_= (setQ: Int) = this._hdQuantum = setQ
+  def hdQuantum_= (setQ: Int)={
+    this._hdQuantum = setQ
+    resetHdQuantum = setQ
 
+  }
   def printerQuantum = _printerQuantum
-  def printerQuantum_= (setQ: Int) = this._printerQuantum = setQ
+  def printerQuantum_= (setQ: Int) = {
+      this._printerQuantum = setQ
+      resetPrinterQuantum = setQ
+  }
 
   def signalResource = _signalResource
-  def setQuantumSignal_=(numberQ: Int) = this._signalResource = numberQ // define em qual quantum o processador ira saber q este processo precisa do hd ou impressora dentro do intervalo de quantuns do processo[1,(myQuantum-1)]
+  def setQuantumSignal_=(numberQ: Int) = {// define em qual quantum o processador ira saber q este processo precisa do hd ou impressora dentro do intervalo de quantuns do processo[1,(myQuantum-1)]
+    this._signalResource = numberQ
+    resetSignal = numberQ
+  }
   def hasSignalInThisQuantum(): Boolean= (((this.myQuantum -this.remainingQuantum) == this._signalResource)&& this._signalResource > 0)
 
 
@@ -43,9 +52,7 @@ class Process(private var _ID: Int, private var _priority:Int, private var _stat
   }
 
   def showProcess():String={
-
       ("Process ID:"+this._ID+"|"+this.state+"|"+"|AllQuantum:"+this.myQuantum+"|RemainingQuantum:"+this.remainingQuantum)
-
   }
 
   def insightProcess()={
@@ -55,6 +62,12 @@ class Process(private var _ID: Int, private var _priority:Int, private var _stat
 
   }
 
+  def resetProcess()={
+      _state = Process.READY_STATE
+      _signalResource = resetSignal
+      _hdQuantum = resetHdQuantum
+      _printerQuantum = resetPrinterQuantum
+  }
 
 }
 

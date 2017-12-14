@@ -46,30 +46,42 @@ private  def checkPManager():Boolean={
   }
 
 
-def showResultCpuClock(){
-    println()
-    println("___Log de de ciclos de [CPU]: (CoreId:"+this.coreId+")")
-    println("------Ciclos ocupados:"+this.occupiedClock)
-    println("------Ciclos ociosos:"+this.idleClock)
 
-
-}
 
   private def runCurrentProcess():Unit={// @TODO melhorar a maneira como os quantuns sao analizados durante a execucao
       if(this.curProcess!= null){
-          println("\n"+this.msgHeaderCpu +"Iniciando Processo(ID:" +this.curProcess.ID+")|")
+        if(this.curProcess.state!=Process.BLOCKED_STATE){
+          if(!Results.testFlag)
+            println("\n"+this.msgHeaderCpu +"Iniciando Processo(ID:" +this.curProcess.ID+")|")
           while(this.curProcess.receivedQuantum>0 && this.curProcess.remainingQuantum >0 && !this.curProcess.hasSignalInThisQuantum){
                 tickOccupiedClock(1)//incrementa uma unidade na quantidade de clock ocupado
-                println(this.msgHeaderCpu+"\t"+this.curProcess.showProcessRunning())
+              if(!Results.testFlag)  println(this.msgHeaderCpu+"\t"+this.curProcess.showProcessRunning())
                 curProcess.remainingQuantum_=(curProcess.remainingQuantum -1)//diminui um quantum da quantidade restante para acabar a tarefa
                 curProcess.receivedQuantum_=(curProcess.receivedQuantum-1)
           }
           if(this.curProcess.hasSignalInThisQuantum){
-              println(this.msgHeaderCpu+"Processo Solicitou["+curProcess.ID +"]"+{if(curProcess.hdQuantum>0) "Disco Rigido" else "Impressora"})
-            //  curProcess.remainingQuantum_=(curProcess.remainingQuantum -1)
-            //  curProcess.receivedQuantum_=(curProcess.receivedQuantum-1)
-          }
+              if(!Results.testFlag)println(this.msgHeaderCpu+"Processo Solicitou["+curProcess.ID +"]"+{if(curProcess.hdQuantum>0) "Disco Rigido" else "Impressora"})
+            }
+        }else{//processo solicitou algum recurso(impressora ou hd)
 
+            while(mySignalBus.getCoreTurn!=SignalBus.RESOURCE_FREE){
+                //Thread.sleep(200)
+            }
+            if(curProcess.hdQuantum>0){
+                tickIdleClock(curProcess.hdQuantum)
+                  mySignalBus.insertHDQueue(curProcess,this.coreId)
+            }else{
+                tickIdleClock(curProcess.printerQuantum)
+                mySignalBus.insertPrinterQueue(curProcess,this.coreId)
+            }
+
+            while(!mySignalBus.notPreemptiveTurn){
+
+            }
+            curProcess_=(mySignalBus.getOneProcess)
+            curProcess.state_=(Process.RUNNING_STATE)
+            runCurrentProcess//chamada recursiva para voltar a executar o processo quando volta do recurso
+        }
       }
     }
 
@@ -81,14 +93,15 @@ def showResultCpuClock(){
       while(this.processManagerRequest()){
             runCurrentProcess
       }
-      this.mySignalBus.setSignalToContinue_=(false)//avisa os dispositivos de I/O para encerrarem a thread
+      mySignalBus.setSignalToContinue_=(false)
+      Results.insertResults(this)
     }else println("Erro nas configurações")
-    showResultCpuClock
+    //showResultCpuClock
   }
 
   def run(){
       this.runCpu
-      println("Cpu Encerrou"+this.coreId)
+      //println("Cpu Encerrou"+this.coreId)
   }
 
 }

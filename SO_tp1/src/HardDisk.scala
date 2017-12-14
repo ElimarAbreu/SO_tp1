@@ -28,6 +28,7 @@ class HardDisk(private var _ID:Int, private var _myQueue:Queue[Process], private
             //i = i-1
             p.hdQuantum_=(p.hdQuantum-1)
         }
+        if(!Results.testFlag)
         println("|HD("+this.ID+")|__>: Processo ("+p.ID+")Finalizou tarefa")
     //p.hdQuantum_=(0)
     p
@@ -49,7 +50,7 @@ class HardDisk(private var _ID:Int, private var _myQueue:Queue[Process], private
 
 
       this.runHDResource
-      println("HD encerrou")
+      //println("HD encerrou")
 
   }
 
