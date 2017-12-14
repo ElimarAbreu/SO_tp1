@@ -1,5 +1,5 @@
 import scala.collection.mutable.Queue
-import java.util.concurrent.Executors
+//import java.util.concurrent.Executors
 
 
 object Main{
@@ -10,6 +10,7 @@ object Main{
   var Mymenu = new Menu
 
   //Opções do Menu
+
   Mymenu.fos
   Mymenu.tiposistema
   Mymenu.recursosistema
@@ -18,11 +19,12 @@ object Main{
   Mymenu.nprocessos
 
   var pm : ProcessManager=null
-  var cpu : Cpu= null
+  var cpus : Array[Cpu] = null
+  var threads : Array[Thread] = null
   var hd:HardDisk=null
   var printer:Printer=null
   var busSignal = new SignalBus()
-  var cpu2: Cpu= null
+
   var t1 : Thread =null
   var t2 : Thread =null
   //Se o sistema for preemptivo.
@@ -41,61 +43,63 @@ object Main{
   }
   pm.verifySettings
   printer = new Printer(7,busSignal)
-  //cpu = new Cpu(,pm,busSignal)
   hd = new HardDisk(10,busSignal)
-  new Thread(hd).start
-  new Thread(printer).start
+  cpus = new Array[Cpu](Mymenu.d)
+  threads = new Array[Thread](Mymenu.d+2)
 
-if(Mymenu.d == 2){
-
-  cpu = new Cpu(1,pm,busSignal)
-  cpu2 = new Cpu(2,pm,busSignal)
-  t1 = new Thread(cpu)
-  t2 = new Thread(cpu2)
-  t1.start
-  t2.start
-  t1.join
-  t2.join
-}else{
-  cpu = new Cpu(1,pm,busSignal)
-  t1 = new Thread(cpu)
-  t1.start
-  t1.join
-}
-  //new Thread(cpu).start
+  for(i<-1 to Mymenu.d)
+      cpus(i-1) = new Cpu(i,pm,busSignal)
+  for(i<-1 to (Mymenu.d))
+      threads(i-1) = new Thread(cpus(i-1))
+  threads(Mymenu.d) = new Thread(hd)
+  threads(Mymenu.d+1) = new Thread(printer)
 
 
-/*Descomentar esta parte para teste
+  threads.foreach(t=>{t.start})
+  threads.foreach(t=>{t.join})
+  Results.showResults
+
+
+/* Relatorio de testes ainda falta arrumar
+  Results.testFlag = true
+  var numCpus:Int=1
   var pm : ProcessManager=null
-  var cpu:Cpu = null
-  var hd: HardDisk= null
-  var s : SignalBus = new SignalBus()
-  println("Informe o numero de processos:")
-  val n = scala.io.StdIn.readInt();
+  var cpu : Cpu = null
+  var threads : Array[Thread] = null
+  var hd:HardDisk=null
+  var printer:Printer=null
+  var busSignal = new SignalBus()
+  var schudelers =new Array[Schudeler](4)
+  schudelers(0) = new FIFO()
+  schudelers(1) = new ShortestJobFirst()
+  schudelers(2) = new RoundRobin()
+  schudelers(3) = new ShortestProcessRemaining()
+  var q = ProcessFactory.buildProcessQueue(100)//cria uma fila de processos para teste
+//  Process.showProcessQueue(ProcessFactory.resetProcessQueue)
+  for(j<-1 to schudelers.length){
 
-  println("Informe o numero do algoritmo de escalonamento")
-  println("1- FIFO")
-  println("2- ShortestJobFirst")
-  println("3- RoundRobin")
-  println("4- ShortestProcessRemaining")
+      pm = new ProcessManager(new Dispatcher(),schudelers(j-1),q.clone)
+      pm.verifySettings
+      printer = new Printer(7,busSignal)
+      hd = new HardDisk(10,busSignal)
 
-  var x = scala.io.StdIn.readInt();
-    x match {
+      threads = new Array[Thread](3)
 
-        case 1=> pm = new ProcessManager(new Dispatcher(),new FIFO(),n)
-        case 2=> pm = new ProcessManager(new Dispatcher(),new ShortestJobFirst(),n)
-        case 3=> pm = new ProcessManager(new Dispatcher(),new RoundRobin(),n)
-        case 4=> pm = new ProcessManager(new Dispatcher(),new ShortestProcessRemaining(),n)
-        case _ => println("Valor invalido")
+    //  for(i<-1 to numCpus)
+      cpu = new Cpu(j,pm,busSignal)
+      //for(i<-1 to (numCpus))
+      threads(0) = new Thread(cpu)
+      threads(1) = new Thread(hd)
+      threads(2) = new Thread(printer)
+
+
+      threads.foreach(t=>{t.start})
+      threads.foreach(t=>{t.join})
+      Results.showResults
+      Results.cleanQueue
+
+      //println("Apos")
     }
-    hd = new HardDisk(3,s)
-    cpu = new Cpu(1,pm,s)
-
-    new Thread(cpu).start
-    new Thread(hd).start
-
 */
-
-
   }
 }
