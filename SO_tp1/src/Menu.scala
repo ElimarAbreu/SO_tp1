@@ -66,13 +66,15 @@ class Menu{
       if(c==1){  //Opções para sistemas premptivo.
           println("1 - Round Robin");
           println("2 - Shortest Process Remaining Time");
+          println("3 - Multiples Queues");
       }
       if(c==2 || b==1){  //Opções para sistemas não premptivo(cooperativo).
           println("1 - First-In First-Out (FIFO)");
           println("2 - Shortest Job First");
+          println("3 - Priorities");
       }
       e = scala.io.StdIn.readInt();
-      if(e!=1 && e!=2){
+      if(e!=1 && e!=2 && e!= 3){
           erro
           algoritmos
       }
