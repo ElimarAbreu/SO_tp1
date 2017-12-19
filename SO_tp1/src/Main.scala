@@ -1,10 +1,10 @@
 import scala.collection.mutable.Queue
 //import java.util.concurrent.Executors
 
-
 object Main{
-    def main(args :Array[String]){
-	//Instanciando objeto Menu
+
+  def main(args :Array[String]){
+      //Instanciando objeto Menu
       var Mymenu = new Menu
       //Opções do Menu
 
@@ -24,21 +24,23 @@ object Main{
 
       var t1 : Thread =null
       var t2 : Thread =null
+
       //Se o sistema for preemptivo.
       if(Mymenu.c==1){
-        Mymenu.e match {
-            case 1=> pm = new ProcessManager(new Dispatcher(),new RoundRobin(),Mymenu.f)
-            case 2=> pm = new ProcessManager(new Dispatcher(),new ShortestProcessRemaining(),Mymenu.f)
-            case 3=> pm = new ProcessManager(new Dispatcher(),new MultiplesQueues(),Mymenu.f)
-        }
+          Mymenu.e match {
+              case 1=> pm = new ProcessManager(new Dispatcher(),new RoundRobin(),Mymenu.f)
+              case 2=> pm = new ProcessManager(new Dispatcher(),new ShortestProcessRemaining(),Mymenu.f)
+              case 3=> pm = new ProcessManager(new Dispatcher(),new MultiplesQueues(),Mymenu.f)
+          }
       }
+
       //Se o sistema for cooperativo(não premptivo).
       if(Mymenu.c ==2 || Mymenu.b==1){
-        Mymenu.e match {
-            case 1=> pm = new ProcessManager(new Dispatcher(),new FIFO(),Mymenu.f)
-            case 2=> pm = new ProcessManager(new Dispatcher(),new ShortestJobFirst(),Mymenu.f)
-            case 3=> pm = new ProcessManager(new Dispatcher(),new Priorities(),Mymenu.f)
-        }
+          Mymenu.e match {
+              case 1=> pm = new ProcessManager(new Dispatcher(),new FIFO(),Mymenu.f)
+              case 2=> pm = new ProcessManager(new Dispatcher(),new ShortestJobFirst(),Mymenu.f)
+              case 3=> pm = new ProcessManager(new Dispatcher(),new Priorities(),Mymenu.f)
+          }
       }
       pm.verifySettings
       printer = new Printer(7,busSignal)
@@ -53,16 +55,12 @@ object Main{
       threads(Mymenu.d) = new Thread(hd)
       threads(Mymenu.d+1) = new Thread(printer)
 
-
       threads.foreach(t=>{t.start})
       threads.foreach(t=>{t.join})
       Results.showResults
 
-
-
-
-    ///Relatorio de testes
-/*
+      ///Relatorio de testes
+      /*
       Results.testFlag = true
       var busSignal: SignalBus=null
 
@@ -77,7 +75,6 @@ object Main{
       schudelers(5) = new MultiplesQueues()
       Process.showProcessQueue(q)
       for(j<-1 to schudelers.length){
-
           busSignal = new SignalBus()
           threads(0) = new Thread(new Cpu(j,new ProcessManager(new Dispatcher(),schudelers(j-1),ProcessFactory.cloneProcessQueue(q)),busSignal))
           threads(1) = new Thread(new HardDisk(j+10,busSignal))
@@ -86,8 +83,8 @@ object Main{
           threads.foreach(t=>{t.join})
           Results.showResults
           Results.cleanQueue
-
-        }
-        */
       }
+      */
+  }
+
 }
