@@ -2,7 +2,6 @@ import scala.util.Random
 import scala.collection.mutable.Queue
 
 object  ProcessFactory {
-  var resetProcessQueue:Queue[Process] = new Queue[Process]()
   var nextId:Int = 1
   var numberProcess:Int = 0
   def buildProcess():Process={
@@ -18,21 +17,33 @@ object  ProcessFactory {
       var i=0
       var qProcess  = new Queue[Process]()
       val perc = rr.nextDouble()
-      var numOther = if(!Results.testFlag)Math.ceil(perc*numProcess) else 0.5d*numProcess.toDouble
-      //println("Numero de processos de outros"+numOther)
+      var numOther = if(!Results.testFlag)Math.ceil(perc*numProcess) else 0.5d*numProcess.toDouble//if( perc > 0.5 ) Math.ceil((perc-0.5)*numProcess) else Math.ceil(perc*numProcess)  //define q o numero de processos de hd ou impressora seja no maximo 50% do total de processos q o usuario digitou
+      //println("numOther"+numOther)
       for (i <- 0 to (numProcess-1)){
-          var newP = this.buildProcess()
-          if(numOther>0){
-              newP.setQuantumSignal_=(1+rr.nextInt(newP.myQuantum -1))//configura em qual quantum do cpu o processo deve solicitar outro recurso(impressora ou hd)
-              if(rr.nextBoolean())
-                  newP.hdQuantum_=(2*(1 + rr.nextInt(25) ))
-              else
-                  newP.printerQuantum_=(2*(1 + rr.nextInt(25) ))
-              numOther = numOther-1
+             var newP = this.buildProcess()
+                if(numOther>0){
+                  newP.setQuantumSignal_=(1+rr.nextInt(newP.myQuantum -1))//configura em qual quantum do cpu o processo deve solicitar outro recurso(impressora ou hd)
+                  if(rr.nextBoolean())
+                    newP.hdQuantum_=(2*(1 + rr.nextInt(25) ))
+                  else
+                    newP.printerQuantum_=(2*(1 + rr.nextInt(25) ))
+
+                  numOther = numOther-1
+                }
+                qProcess+=newP
           }
-          qProcess+=newP
-      }
-      qProcess
-  }
+          qProcess
+        }
+
+        def cloneProcessQueue(q: Queue[Process]):Queue[Process]={
+              var newQ = new Queue[Process]()
+              q.foreach(e=>{
+                  var p=new Process(e.ID,e.priority,e.state,e.myQuantum,e.hdQuantum,e.printerQuantum)
+                  p.setQuantumSignal_=(e.signalResource)
+                  newQ+=p
+
+              })
+            newQ
+        }
 
 }

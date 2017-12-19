@@ -4,13 +4,9 @@ import scala.collection.mutable.Queue
 
 object Main{
     def main(args :Array[String]){
-
-
 	//Instanciando objeto Menu
-  var Mymenu = new Menu
-
+      var Mymenu = new Menu
       //Opções do Menu
-
 
       Mymenu.fos
       Mymenu.tiposistema
@@ -63,35 +59,35 @@ object Main{
       Results.showResults
 
 
-//println("FIM")
-  //new Thread(cpu).start
 
-///Relatorio de testes
+
+    ///Relatorio de testes
 /*
-  Results.testFlag = true
-  var busSignal: SignalBus=null
+      Results.testFlag = true
+      var busSignal: SignalBus=null
 
-  var threads = new Array[Thread](3)
-  var schudelers =new Array[Schudeler](4)
-  ProcessFactory.resetQueue = ProcessFactory.buildProcessQueue(100)//cria uma fila de processos para teste
-  schudelers(0) = new FIFO()
-  schudelers(1) = new ShortestJobFirst()
-//  schudelers(2) = new Priorities()
-  schudelers(2) = new RoundRobin()
-  schudelers(3) = new ShortestProcessRemaining()
-  //schudelers(5) = new MultiplesQueues()
-  Process.showProcessQueue(ProcessFactory.resetQueue)
-  for(j<-1 to schudelers.length){
-      busSignal = new SignalBus()
-      threads(0) = new Thread(new Cpu(j,new ProcessManager(new Dispatcher(),schudelers(j-1),ProcessFactory.resetQueue),busSignal))
-      threads(1) = new Thread(new HardDisk(j+10,busSignal))
-      threads(2) = new Thread(new Printer(j+11,busSignal))
-      threads.foreach(t=>{t.start})
-      threads.foreach(t=>{t.join})
-      Results.showResults
-      Results.cleanQueue
+      var threads = new Array[Thread](3)
+      var schudelers =new Array[Schudeler](6)
+      var q = ProcessFactory.buildProcessQueue(100)//cria uma fila de processos para teste
+      schudelers(0) = new FIFO()
+      schudelers(1) = new ShortestJobFirst()
+      schudelers(2) = new Priorities()
+      schudelers(3) = new RoundRobin()
+      schudelers(4) = new ShortestProcessRemaining()
+      schudelers(5) = new MultiplesQueues()
+      Process.showProcessQueue(q)
+      for(j<-1 to schudelers.length){
 
-    }
-*/
-  }
+          busSignal = new SignalBus()
+          threads(0) = new Thread(new Cpu(j,new ProcessManager(new Dispatcher(),schudelers(j-1),ProcessFactory.cloneProcessQueue(q)),busSignal))
+          threads(1) = new Thread(new HardDisk(j+10,busSignal))
+          threads(2) = new Thread(new Printer(j+11,busSignal))
+          threads.foreach(t=>{t.start})
+          threads.foreach(t=>{t.join})
+          Results.showResults
+          Results.cleanQueue
+
+        }
+        */
+      }
 }
