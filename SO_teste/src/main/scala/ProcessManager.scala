@@ -69,11 +69,17 @@ class ProcessManager(private var _myDis: Dispatcher, private var _mySch: Schudel
 
   private def runInPreemptiveMode(cpu: Cpu): Unit={
         var resultProcess : Process = null
+        if(!ProcessManager._firstExecuteScheduling && Results.testFlag){
+            this.verifySettings
+            ProcessManager._firstExecuteScheduling = true
+        }
           if(cpu.mySignalBus.getSignal)
               this.getProcessFromResources(cpu)
           if(!mainQueue.isEmpty){//ocorre a troca de processos, caso na haja mais processos na fila principal do cpu, sinaliza ao cpu para encerrar
                 executeScheduler //executa o algoritmo de agendamento
                 resultProcess = mainQueue.dequeue
+                if(resultProcess.remainingQuantum==resultProcess.myQuantum)
+                  resultProcess.firstTime = cpu.getTotalClock
             }
                 this.myDis.dispatchProcess(cpu,resultProcess)//coloca outro processo para executar na cpu
     }
@@ -82,13 +88,20 @@ class ProcessManager(private var _myDis: Dispatcher, private var _mySch: Schudel
         var resultProcess : Process = null
         if(!ProcessManager._firstExecuteScheduling){//executa somente uma vez o algoritmo de agendamento em sistemas batch
             executeScheduler
+            if(Results.testFlag)
+                this.verifySettings
+
             ProcessManager._firstExecuteScheduling = true
         }
               if(cpu.curProcess!=null && cpu.curProcess.state == Process.BLOCKED_STATE)//insere denovo o mesmo processo no cpu
                 resultProcess = cpu.curProcess
               else{
-                  if(!mainQueue.isEmpty)
-                      resultProcess = mainQueue.dequeue
+                  if(!mainQueue.isEmpty){
+                        resultProcess = mainQueue.dequeue
+                        if(resultProcess.remainingQuantum==resultProcess.myQuantum)
+                            resultProcess.firstTime = cpu.getTotalClock
+                  }
+
               }
               this.myDis.dispatchProcess(cpu,resultProcess)//indica que o processo atual do cpu solicitou recurso e o cpu deve esperar até q ele consiga acessar o recurso
 
@@ -97,7 +110,7 @@ class ProcessManager(private var _myDis: Dispatcher, private var _mySch: Schudel
 
   def serveToCpu(cpu: Cpu): Boolean ={//rotina que trata do gerenciamento do cpu
       this.synchronized{
-      //  if(!ProcessManager._firstExecuteScheduling && Results.testFlag)this.verifySettings
+
           if(ProcessManager.numberOfProcess==(-1) ){ProcessManager.numberOfProcess = mainQueue.length}
               var prevProcess = cpu.curProcess
               cpu.tickIdleClock(1)
@@ -118,16 +131,12 @@ class ProcessManager(private var _myDis: Dispatcher, private var _mySch: Schudel
                                 }
                       }
                       else{//o processo termina
-                          _numberFinishedProcess +=1
-                          if(Results.testFlag){
-                                prevProcess.resetProcess
-                                ProcessFactory.resetQueue+=prevProcess
-                          }
-                          else
-                              println("\n"+"|[ProcessManager]__>:Processo:ID["+prevProcess.ID+"]Terminou|")
-
-                        cpu.curProcess_=(null)
-                        prevProcess = null
+                            _numberFinishedProcess +=1
+                            cpu.averageReturnTime += (cpu.getTotalClock-prevProcess.firstTime).toDouble
+                            if(!Results.testFlag)
+                                println("\n"+"|[ProcessManager]__>:Processo:ID["+prevProcess.ID+"]Terminou|")
+                              cpu.curProcess_=(null)
+                              prevProcess = null
                       }
               }
 
@@ -137,7 +146,9 @@ class ProcessManager(private var _myDis: Dispatcher, private var _mySch: Schudel
                 runInNotPreemptiveMode(cpu)
 
               if(_numberFinishedProcess == ProcessManager.numberOfProcess){
+                    cpu.averageReturnTime = (cpu.averageReturnTime/ProcessManager.numberOfProcess.toDouble)
                     cpu.mySignalBus.setSignalToContinue_=(false)
+                    ProcessManager._firstExecuteScheduling = false
                     false
                 }else
                     true
@@ -150,9 +161,8 @@ class ProcessManager(private var _myDis: Dispatcher, private var _mySch: Schudel
 
 
     object ProcessManager{
-      var _firstExecuteScheduling: Boolean = false
-      var numberOfProcess: Int=(-1)
-      var resetQ = new Queue[Process]()
+        var _firstExecuteScheduling: Boolean = false
+        var numberOfProcess: Int=(-1)
     }
 
 }

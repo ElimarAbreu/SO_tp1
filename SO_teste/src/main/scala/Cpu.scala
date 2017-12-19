@@ -1,8 +1,8 @@
-class Cpu( private var _coreId: Int, private var _myPManager: ProcessManager ,private var _mySignalBus: SignalBus, private var _curProcess: Process,private var _occupiedClock: Int,private var _idleClock:Int) extends Runnable {
+class Cpu( private var _coreId: Int, private var _myPManager: ProcessManager ,private var _mySignalBus: SignalBus, private var _curProcess: Process,private var _occupiedClock: Int,private var _idleClock:Int,var averageReturnTime:Double=0.0) extends Runnable {
 
-  
+
   def this(_coreId: Int,myPManager: ProcessManager,bus: SignalBus){
-      this(_coreId,myPManager,bus,null,0,0)
+      this(_coreId,myPManager,bus,null,0,0,0)
   }
 
   def coreId = _coreId//getter do id
@@ -20,6 +20,7 @@ class Cpu( private var _coreId: Int, private var _myPManager: ProcessManager ,pr
 
   def idleClock = _idleClock
   def tickIdleClock(numClocks: Int):Unit ={this._idleClock+=numClocks}
+  def getTotalClock():Int={ idleClock+occupiedClock}
 
   def msgHeaderCpu():String={
     "|[CPU]_(CoreId:"+this.coreId+")|>"
@@ -29,11 +30,7 @@ class Cpu( private var _coreId: Int, private var _myPManager: ProcessManager ,pr
       this.myPManager.serveToCpu(this)
   }
 
-/*private def takeBackProcess():Unit={
-  if(mySignalBus.getSignal)
-  this.myPManager.getProcessFromResources(this)
-}
-*/
+
 private  def checkPManager():Boolean={
       if(this.myPManager!=null){
           //this.myPManager.verifySettings()
@@ -79,7 +76,7 @@ private  def checkPManager():Boolean={
                 curProcess.state_=(Process.RUNNING_STATE)
                 runCurrentProcess//chamada recursiva para voltar a executar o processo quando volta do recurso
         }
-      }
+      }else tickIdleClock(1)
     }
 
 
@@ -93,12 +90,12 @@ private  def checkPManager():Boolean={
       mySignalBus.setSignalToContinue_=(false)
       Results.insertResults(this)
     }else println("Erro nas configurações")
-    //showResultCpuClock
+
   }
 
   def run(){
       this.runCpu
-      //println("Cpu Encerrou"+this.coreId)
+
   }
 
 }

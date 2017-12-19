@@ -2,7 +2,6 @@ import scala.util.Random
 import scala.collection.mutable.Queue
 
 object  ProcessFactory {
-  var resetQueue:Queue[Process] = new Queue[Process]()
   var nextId:Int = 1
   var numberProcess:Int = 0
   def buildProcess():Process={
@@ -36,6 +35,15 @@ object  ProcessFactory {
           qProcess
         }
 
+        def cloneProcessQueue(q: Queue[Process]):Queue[Process]={
+              var newQ = new Queue[Process]()
+              q.foreach(e=>{
+                  var p=new Process(e.ID,e.priority,e.state,e.myQuantum,e.hdQuantum,e.printerQuantum)
+                  p.setQuantumSignal_=(e.signalResource)
+                  newQ+=p
 
+              })
+            newQ
+        }
 
 }

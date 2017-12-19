@@ -5,7 +5,7 @@ object Results{
   def insertResults(cpu: Cpu){
     this.synchronized{
 
-        var inf = new Information(cpu.coreId,cpu.occupiedClock,cpu.idleClock,100.00d*(cpu.occupiedClock.toDouble/(cpu.occupiedClock+cpu.idleClock).toDouble))
+        var inf = new Information(cpu.coreId,cpu.occupiedClock,cpu.idleClock,100.00d*(cpu.occupiedClock.toDouble/(cpu.occupiedClock+cpu.idleClock).toDouble),cpu.averageReturnTime)
         results+=inf
     }
 
@@ -20,10 +20,10 @@ object Results{
         i.showInformation
 
     })
-
+    println("___________________")
     r = (r.toDouble/results.length.toDouble).toDouble
     println("Porcentagem de uso médio do(s) "+results.length+f" Processador(es):$r%2.2f%%" )
-      println("___________________")
+
   }
 
   def cleanQueue(){
