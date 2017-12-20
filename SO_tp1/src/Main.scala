@@ -6,11 +6,13 @@ object Main{
   def main(args :Array[String]){
       //Instanciando objeto Menu
       var Mymenu = new Menu
+      
       //Opções do Menu
-
       Mymenu.fos
       Mymenu.tiposistema
-      Mymenu.recursosistema
+      if(Mymenu.a==2){
+          Mymenu.recursosistema
+      }
       Mymenu.processamento
       Mymenu.algoritmos
       Mymenu.nprocessos
@@ -60,13 +62,13 @@ object Main{
       Results.showResults
 
       ///Relatorio de testes
-      /*
+      /*    
       Results.testFlag = true
       var busSignal: SignalBus=null
 
       var threads = new Array[Thread](3)
       var schudelers =new Array[Schudeler](6)
-      var q = ProcessFactory.buildProcessQueue(100)//cria uma fila de processos para teste
+      var q = ProcessFactory.buildProcessQueue(10)//cria uma fila de processos para teste
       schudelers(0) = new FIFO()
       schudelers(1) = new ShortestJobFirst()
       schudelers(2) = new Priorities()
